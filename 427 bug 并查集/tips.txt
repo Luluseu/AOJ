@@ -1,0 +1,139 @@
+#include<stdio.h>
+#define M 2002
+//并查集，用revsex[i]记录每次的与i相对的那个性别的bug，如果一只bug和两个性别的bug都发生了关系，他们的恋情就要被公开了。
+int bin[M],rank[M],revsex[M];
+void MakeSet(int n)//初始化
+{
+	int i;
+	for(i=1;i<=n;i++)
+	{
+		bin[i]=i;
+		revsex[i]=0;
+		rank[i]=0;
+	}
+}
+int find(int x)//查
+{
+	if(bin[x]!=x)
+		bin[x]=find(bin[x]);
+	return bin[x];
+}
+void Union(int x,int y)//并
+{
+	x=find(x);
+	y=find(y);
+	if(x==y)return;
+	if(rank[x]>rank[y])
+		bin[y]=x;
+	else 
+	{
+		if(rank[x]==rank[y])
+			rank[y]++;
+		bin[x]=y;
+	}
+}
+int main()
+{
+	int flag,T,k,i,n,x,y,m;
+	scanf("%d",&T);
+	for(k=1;k<=T;k++)
+	{
+		flag=0;
+		scanf("%d%d",&n,&m);
+		MakeSet(n);
+		while(m--)
+		{
+			scanf("%d%d",&x,&y);
+			if(flag)continue;
+			if(find(x)==find(y))
+				flag=1;
+			else 
+			{
+				if(revsex[x]!=0)
+				{
+					Union(revsex[x],y);
+				}
+				else revsex[x]=y;
+				if(revsex[y]!=0)
+				{
+					Union(revsex[y],x);
+				}
+				else revsex[y]=x;
+			}
+			
+		}
+		printf("Scenario #%d:\n",k);
+		if(flag)
+			printf("Suspicious bugs found!\n\n");
+		else printf("No suspicious bugs found!\n\n");
+	}
+	return 0;
+}
+
+
+=========
+#include <iostream>
+#define MaxNum 2001
+using namespace std;
+int bug[MaxNum];
+int fucked[MaxNum];
+
+int find_father(int n)
+{
+    while(n != bug[n])
+        n = bug[n];
+    return n;
+}
+
+void merge(int a,int b)
+{
+    a=find_father(a);
+    if (a!=b) bug[b]=a;
+}
+
+int main ()
+{
+    int num;
+    int ac;
+    int i;
+    int j;
+    int a;
+    int b;
+    int t;
+    int fa;
+    int fb;
+    bool found;
+    scanf("%d",&t);
+    for (j=1; j<=t; j++)
+    {
+        
+        scanf("%d %d", &num, &ac);
+        found=false;
+        for (i=1; i<=num; i++)
+        {
+            bug[i]=i;// 以自己为父节点
+            fucked[i]=0;//都标记没有搞过的对象
+        }
+        
+        for (i=1; i<=ac; i++)
+        {
+            scanf("%d %d",&a,&b);
+            if (found)
+                continue;
+            fa=find_father(a);
+            fb=find_father(b);
+            if (fa==fb)
+            {
+                found=true;
+                continue;
+            }
+            if(fucked[a]) merge(fucked[a], b);//fucked为a搞过的。所以b就和a搞过的合并在一起。因为b也是a搞过的。
+            else fucked[a] = b;//没搞过，现在搞过了。
+            if(fucked[b]) merge(fucked[b], a);//两个都有搞过的对象归到第一种情况的
+            else fucked[b] = a;
+        }
+        printf("Scenario #%d:\n",j );
+        puts(found ? "Suspicious bugs found!" : "No suspicious bugs found!");
+        printf("\n");
+    }
+}
